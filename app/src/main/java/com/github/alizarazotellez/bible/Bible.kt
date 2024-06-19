@@ -24,3 +24,7 @@ fun booksAreLoaded(): Boolean {
 fun getLoadedBooks(): List<Book> {
     return books
 }
+
+fun getBook(name: String): Book? {
+    return books.find { it.Name == name }
+}
