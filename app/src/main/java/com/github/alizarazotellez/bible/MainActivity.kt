@@ -4,10 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
@@ -19,21 +15,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.github.alizarazotellez.bible.ui.theme.BibleTheme
-import kotlinx.serialization.Serializable
 
-
-@Serializable
-object Home
-
-@Serializable
-object About
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,16 +34,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BibleTheme {
-                val navController = rememberNavController()
-
-                NavHost(navController = navController, startDestination = Home) {
-                    composable<Home> {
-                        HomeScreen(onNavigateToAboutScreen = { navController.navigate(route = About) })
-                    }
-                    composable<About> {
-                        AboutScreen(onNavigateToHomeScreen = { navController.navigate(route = Home) })
-                    }
-                }
+                MainComponent()
             }
         }
     }
@@ -58,73 +42,47 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onNavigateToAboutScreen: () -> Unit, modifier: Modifier = Modifier) {
-    Scaffold(
-        topBar = { TopAppBar(title = { Text(text = "Bible") }) },
-        bottomBar = {
-            NavigationBar {
-                NavigationBarItem(selected = true, onClick = {}, icon = {
-                    Icon(
-                        Icons.Default.Home,
-                        contentDescription = null,
-                    )
-                })
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { onNavigateToAboutScreen() },
-                    icon = {
-                        Icon(
-                            Icons.Default.Info,
-                            contentDescription = null,
-                        )
-                    })
-            }
-        },
-        modifier = modifier
+fun MainComponent(modifier: Modifier = Modifier) {
+    val navController = rememberNavController()
+
+    Scaffold(topBar = {
+        TopAppBar(title = { Text(text = "Bible") })
+    }, bottomBar = {
+        CustomNavigationBar(
+            navController = navController, items = listOf(
+                CustomNavigationBarItem(Icons.Default.Home, Screen.Home),
+                CustomNavigationBarItem(Icons.Default.Info, Screen.About),
+            )
+        )
+    }, modifier = modifier
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(text = "Bible", fontSize = 30.sp)
+        NavHost(navController = navController, startDestination = Screen.Home) {
+            composable<Screen.Home> {
+                HomeScreen(padding = padding)
+            }
+            composable<Screen.About> {
+                AboutScreen(padding = padding)
+            }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+data class CustomNavigationBarItem(val icon: ImageVector, val screen: Screen)
+
 @Composable
-fun AboutScreen(onNavigateToHomeScreen: () -> Unit, modifier: Modifier = Modifier) {
-    Scaffold(
-        topBar = { TopAppBar(title = { Text(text = "Bible") }) },
-        bottomBar = {
-            NavigationBar {
-                NavigationBarItem(selected = false, onClick = { onNavigateToHomeScreen() }, icon = {
-                    Icon(
-                        Icons.Default.Home,
-                        contentDescription = null,
-                    )
-                })
-                NavigationBarItem(selected = true, onClick = {}, icon = {
-                    Icon(
-                        Icons.Default.Info,
-                        contentDescription = null,
-                    )
-                })
-            }
-        },
-        modifier = modifier
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(text = "Made by Anderson.")
+fun CustomNavigationBar(
+    navController: NavController, items: List<CustomNavigationBarItem>
+) {
+    var selected by remember {
+        mutableIntStateOf(0)
+    }
+
+    NavigationBar {
+        items.forEachIndexed { index, item ->
+            NavigationBarItem(selected = selected == index, onClick = {
+                selected = index
+                navController.navigate(item.screen)
+            }, icon = { Icon(item.icon, contentDescription = null) })
         }
     }
 }
