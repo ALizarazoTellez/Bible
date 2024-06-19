@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -51,6 +52,9 @@ fun MainComponent(modifier: Modifier = Modifier) {
         CustomNavigationBar(
             navController = navController, items = listOf(
                 CustomNavigationBarItem(Icons.Default.Home, Screen.Home),
+                CustomNavigationBarItem(
+                    ImageVector.vectorResource(R.drawable.baseline_book_24), Screen.Bible
+                ),
                 CustomNavigationBarItem(Icons.Default.Info, Screen.About),
             )
         )
@@ -59,6 +63,9 @@ fun MainComponent(modifier: Modifier = Modifier) {
         NavHost(navController = navController, startDestination = Screen.Home) {
             composable<Screen.Home> {
                 HomeScreen(padding = padding)
+            }
+            composable<Screen.Bible> {
+                BibleScreen(padding = padding)
             }
             composable<Screen.About> {
                 AboutScreen(padding = padding)

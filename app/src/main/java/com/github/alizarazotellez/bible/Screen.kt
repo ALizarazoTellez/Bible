@@ -7,5 +7,8 @@ sealed class Screen {
     data object Home : Screen()
 
     @Serializable
+    data object Bible : Screen()
+
+    @Serializable
     data object About : Screen()
 }
