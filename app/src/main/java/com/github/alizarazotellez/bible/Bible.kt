@@ -28,3 +28,7 @@ fun getLoadedBooks(): List<Book> {
 fun getBook(name: String): Book? {
     return books.find { it.Name == name }
 }
+
+fun getBookNames(): List<String> {
+    return books.map { it.Name }
+}
