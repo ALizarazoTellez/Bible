@@ -7,7 +7,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -22,9 +21,19 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.github.alizarazotellez.bible.ui.theme.BibleTheme
+import kotlinx.serialization.Serializable
+
+
+@Serializable
+object Home
+
+@Serializable
+object About
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,7 +41,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BibleTheme {
-                MainComponent()
+                val navController = rememberNavController()
+
+                NavHost(navController = navController, startDestination = Home) {
+                    composable<Home> {
+                        HomeScreen(onNavigateToAboutScreen = { navController.navigate(route = About) })
+                    }
+                    composable<About> {
+                        AboutScreen(onNavigateToHomeScreen = { navController.navigate(route = Home) })
+                    }
+                }
             }
         }
     }
@@ -40,32 +58,73 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainComponent(modifier: Modifier = Modifier) {
+fun HomeScreen(onNavigateToAboutScreen: () -> Unit, modifier: Modifier = Modifier) {
     Scaffold(
         topBar = { TopAppBar(title = { Text(text = "Bible") }) },
-        bottomBar = { NavigationBar {
-            NavigationBarItem(selected = true, onClick = { /*TODO*/ }, icon = { Icon(
-                Icons.Default.Home,
-                contentDescription = null,
-            ) })
-            NavigationBarItem(selected = false, onClick = { /*TODO*/ }, icon = { Icon(
-                Icons.Default.Info,
-                contentDescription = null,
-            )})
-        }},
-        modifier = modifier) { padding ->
-        Column(modifier = Modifier
-            .padding(padding)
-            .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(selected = true, onClick = {}, icon = {
+                    Icon(
+                        Icons.Default.Home,
+                        contentDescription = null,
+                    )
+                })
+                NavigationBarItem(
+                    selected = false,
+                    onClick = { onNavigateToAboutScreen() },
+                    icon = {
+                        Icon(
+                            Icons.Default.Info,
+                            contentDescription = null,
+                        )
+                    })
+            }
+        },
+        modifier = modifier
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
             Text(text = "Bible", fontSize = 30.sp)
         }
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainComponentPreview() {
-    BibleTheme {
-        MainComponent()
+fun AboutScreen(onNavigateToHomeScreen: () -> Unit, modifier: Modifier = Modifier) {
+    Scaffold(
+        topBar = { TopAppBar(title = { Text(text = "Bible") }) },
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(selected = false, onClick = { onNavigateToHomeScreen() }, icon = {
+                    Icon(
+                        Icons.Default.Home,
+                        contentDescription = null,
+                    )
+                })
+                NavigationBarItem(selected = true, onClick = {}, icon = {
+                    Icon(
+                        Icons.Default.Info,
+                        contentDescription = null,
+                    )
+                })
+            }
+        },
+        modifier = modifier
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(text = "Made by Anderson.")
+        }
     }
 }
