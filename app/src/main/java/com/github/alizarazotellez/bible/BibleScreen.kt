@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -17,8 +19,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -67,7 +69,7 @@ fun BibleScreen(padding: PaddingValues) {
         }
 
         Column {
-            Row {
+            Row(modifier = Modifier.padding(4.dp)) {
                 CustomDropdownMenu(
                     onSelect = {
                         currentChapter = 0
@@ -78,7 +80,7 @@ fun BibleScreen(padding: PaddingValues) {
                     items = Bible.getBookNames(),
                     modifier = Modifier.weight(2f)
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.width(4.dp))
                 CustomDropdownMenu(
                     onSelect = {
                         currentChapter = it
@@ -98,9 +100,9 @@ fun BibleScreen(padding: PaddingValues) {
 
 @Composable
 fun ChapterViewer(listState: LazyListState, bookName: String, chapter: Int) {
-    LazyColumn(state = listState, modifier = Modifier.padding(horizontal = 16.dp)) {
+    LazyColumn(state = listState, modifier = Modifier.padding(horizontal = 8.dp)) {
         itemsIndexed(Bible.getBook(bookName)?.Content?.get(chapter) ?: listOf()) { index, verse ->
-            Card(onClick = {}) {
+            Card {
                 Text(text = "${index + 1} $verse", modifier = Modifier.padding(8.dp))
             }
 
@@ -121,12 +123,14 @@ fun CustomDropdownMenu(
     ExposedDropdownMenuBox(
         expanded = expanded, onExpandedChange = { expanded = !expanded }, modifier = modifier
     ) {
-        TextField(
+        OutlinedTextField(
             value = items[currentItem],
             onValueChange = {},
             readOnly = true,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor()
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor()
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             items.forEachIndexed { index, item ->
