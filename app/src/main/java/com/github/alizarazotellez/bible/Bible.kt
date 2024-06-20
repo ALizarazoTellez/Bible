@@ -14,6 +14,10 @@ object Bible {
 
     @OptIn(ExperimentalSerializationApi::class)
     fun load(context: Context) {
+        if (books.isNotEmpty()) {
+            return
+        }
+
         val stream = context.resources.openRawResource(R.raw.bible)
         books = Json.decodeFromStream(stream)
     }
