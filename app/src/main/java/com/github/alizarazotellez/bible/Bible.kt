@@ -9,32 +9,30 @@ import kotlinx.serialization.json.decodeFromStream
 @Serializable
 data class Book(val Name: String, val Content: List<List<String>>)
 
-private lateinit var books: List<Book>
+object Bible {
+    private var books: List<Book> = listOf()
 
-@OptIn(ExperimentalSerializationApi::class)
-fun loadBooks(context: Context) {
-    val stream = context.resources.openRawResource(R.raw.bible)
-    books = Json.decodeFromStream(stream)
-}
-
-fun booksAreLoaded(): Boolean {
-    return ::books.isInitialized
-}
-
-fun getLoadedBooks(): List<Book> {
-    return books
-}
-
-fun getBook(name: String): Book? {
-    return books.find { it.Name == name }
-}
-
-private var cachedBookNames: List<String>? = null
-
-fun getBookNames(): List<String> {
-    if (cachedBookNames == null) {
-        cachedBookNames = books.map { it.Name }
+    @OptIn(ExperimentalSerializationApi::class)
+    fun load(context: Context) {
+        val stream = context.resources.openRawResource(R.raw.bible)
+        books = Json.decodeFromStream(stream)
     }
 
-    return cachedBookNames as List<String>
+    fun getBooks(): List<Book> {
+        return books
+    }
+
+    fun getBook(name: String): Book? {
+        return books.find { it.Name == name }
+    }
+
+    private var bookNames: List<String> = listOf()
+
+    fun getBookNames(): List<String> {
+        if (bookNames.isEmpty()) {
+            bookNames = books.map { it.Name }
+        }
+
+        return bookNames
+    }
 }

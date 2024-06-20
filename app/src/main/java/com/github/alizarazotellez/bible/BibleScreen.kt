@@ -39,38 +39,30 @@ fun BibleScreen(padding: PaddingValues) {
             .padding(padding)
             .fillMaxSize()
     ) {
-        var ready by remember {
-            mutableStateOf(booksAreLoaded())
-        }
-
         val context = LocalContext.current
 
-        if (!ready) {
+        var books by remember { mutableStateOf(Bible.getBooks()) }
+        if (books.isEmpty()) {
             LaunchedEffect(Unit) {
-                loadBooks(context)
-                ready = true
+                Bible.load(context)
+                books = Bible.getBooks()
             }
 
             return
         }
 
-        val bookList = getBookNames()
-        var bookIndex by remember {
-            mutableIntStateOf(0)
-        }
-        var chapter by remember {
-            mutableIntStateOf(0)
-        }
-        var onTopList by remember {
-            mutableStateOf(false)
-        }
-        val listState = rememberLazyListState()
+        var currentBook by remember { mutableIntStateOf(0) }
+        var currentChapter by remember { mutableIntStateOf(0) }
 
-        val totalChapters = getBook(bookList[bookIndex])?.Content?.size ?: 0
-        LaunchedEffect(key1 = onTopList) {
-            if (onTopList) {
+        val chaptersOfCurrentBook = books[currentBook].Content.size
+
+        // LazyColumn helpers.
+        var isOnTopList by remember { mutableStateOf(false) }
+        val listState = rememberLazyListState()
+        LaunchedEffect(isOnTopList) {
+            if (isOnTopList) {
                 listState.scrollToItem(0)
-                onTopList = false
+                isOnTopList = false
             }
         }
 
@@ -78,23 +70,28 @@ fun BibleScreen(padding: PaddingValues) {
             Row {
                 CustomDropdownMenu(
                     onSelect = {
-                        chapter = 0
-                        bookIndex = it
-                        onTopList = true
-                    }, currentItem = bookIndex, items = bookList, modifier = Modifier.weight(2f)
+                        currentChapter = 0
+                        currentBook = it
+                        isOnTopList = true
+                    },
+                    currentItem = currentBook,
+                    items = Bible.getBookNames(),
+                    modifier = Modifier.weight(2f)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 CustomDropdownMenu(
                     onSelect = {
-                        chapter = it
-                        onTopList = true
+                        currentChapter = it
+                        isOnTopList = true
                     },
-                    currentItem = chapter,
-                    items = (1..totalChapters).map { it.toString() },
+                    currentItem = currentChapter,
+                    items = (1..chaptersOfCurrentBook).map { it.toString() },
                     modifier = Modifier.weight(1f)
                 )
             }
-            ChapterViewer(listState = listState, bookName = bookList[bookIndex], chapter = chapter)
+            ChapterViewer(
+                listState = listState, bookName = books[currentBook].Name, chapter = currentChapter
+            )
         }
     }
 }
@@ -102,7 +99,7 @@ fun BibleScreen(padding: PaddingValues) {
 @Composable
 fun ChapterViewer(listState: LazyListState, bookName: String, chapter: Int) {
     LazyColumn(state = listState, modifier = Modifier.padding(horizontal = 16.dp)) {
-        itemsIndexed(getBook(bookName)?.Content?.get(chapter) ?: listOf()) { index, verse ->
+        itemsIndexed(Bible.getBook(bookName)?.Content?.get(chapter) ?: listOf()) { index, verse ->
             Card(onClick = {}) {
                 Text(text = "${index + 1} $verse", modifier = Modifier.padding(8.dp))
             }
