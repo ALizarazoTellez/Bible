@@ -60,26 +60,27 @@ fun BibleScreen(padding: PaddingValues) {
             mutableIntStateOf(0)
         }
 
-        val bookChapter = getBook(bookList[bookIndex])?.Content?.get(chapter) ?: listOf()
-        val chapterLength = bookChapter.size
+        val totalChapters = getBook(bookList[bookIndex])?.Content?.size ?: 0
 
         Column {
             Row {
                 CustomDropdownMenu(
-                    onSelect = { bookIndex = it },
-                    currentItem = bookIndex,
-                    items = bookList,
-                    modifier = Modifier.weight(2f)
+                    onSelect = {
+                        chapter = 0
+                        bookIndex = it
+                    }, currentItem = bookIndex, items = bookList, modifier = Modifier.weight(2f)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 CustomDropdownMenu(
-                    onSelect = { chapter = it },
+                    onSelect = {
+                        chapter = it
+                    },
                     currentItem = chapter,
-                    items = (1..chapterLength).map { it.toString() },
+                    items = (1..totalChapters).map { it.toString() },
                     modifier = Modifier.weight(1f)
                 )
             }
-            ChapterViewer(bookName = bookList[bookIndex], chapter = chapter + 1)
+            ChapterViewer(bookName = bookList[bookIndex], chapter = chapter)
         }
     }
 }
@@ -87,7 +88,7 @@ fun BibleScreen(padding: PaddingValues) {
 @Composable
 fun ChapterViewer(bookName: String, chapter: Int) {
     LazyColumn(modifier = Modifier.padding(horizontal = 16.dp)) {
-        itemsIndexed(getBook(bookName)?.Content?.get(chapter - 1) ?: listOf()) { index, verse ->
+        itemsIndexed(getBook(bookName)?.Content?.get(chapter) ?: listOf()) { index, verse ->
             Card(onClick = {}) {
                 Text(text = "${index + 1} $verse", modifier = Modifier.padding(8.dp))
             }
