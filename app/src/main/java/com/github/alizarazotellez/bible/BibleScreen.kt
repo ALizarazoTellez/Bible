@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -59,8 +61,18 @@ fun BibleScreen(padding: PaddingValues) {
         var chapter by remember {
             mutableIntStateOf(0)
         }
+        var onTopList by remember {
+            mutableStateOf(false)
+        }
+        val listState = rememberLazyListState()
 
         val totalChapters = getBook(bookList[bookIndex])?.Content?.size ?: 0
+        LaunchedEffect(key1 = onTopList) {
+            if (onTopList) {
+                listState.scrollToItem(0)
+                onTopList = false
+            }
+        }
 
         Column {
             Row {
@@ -68,26 +80,28 @@ fun BibleScreen(padding: PaddingValues) {
                     onSelect = {
                         chapter = 0
                         bookIndex = it
+                        onTopList = true
                     }, currentItem = bookIndex, items = bookList, modifier = Modifier.weight(2f)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 CustomDropdownMenu(
                     onSelect = {
                         chapter = it
+                        onTopList = true
                     },
                     currentItem = chapter,
                     items = (1..totalChapters).map { it.toString() },
                     modifier = Modifier.weight(1f)
                 )
             }
-            ChapterViewer(bookName = bookList[bookIndex], chapter = chapter)
+            ChapterViewer(listState = listState, bookName = bookList[bookIndex], chapter = chapter)
         }
     }
 }
 
 @Composable
-fun ChapterViewer(bookName: String, chapter: Int) {
-    LazyColumn(modifier = Modifier.padding(horizontal = 16.dp)) {
+fun ChapterViewer(listState: LazyListState, bookName: String, chapter: Int) {
+    LazyColumn(state = listState, modifier = Modifier.padding(horizontal = 16.dp)) {
         itemsIndexed(getBook(bookName)?.Content?.get(chapter) ?: listOf()) { index, verse ->
             Card(onClick = {}) {
                 Text(text = "${index + 1} $verse", modifier = Modifier.padding(8.dp))

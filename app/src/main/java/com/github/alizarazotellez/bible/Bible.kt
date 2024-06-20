@@ -29,6 +29,12 @@ fun getBook(name: String): Book? {
     return books.find { it.Name == name }
 }
 
+private var cachedBookNames: List<String>? = null
+
 fun getBookNames(): List<String> {
-    return books.map { it.Name }
+    if (cachedBookNames == null) {
+        cachedBookNames = books.map { it.Name }
+    }
+
+    return cachedBookNames as List<String>
 }
