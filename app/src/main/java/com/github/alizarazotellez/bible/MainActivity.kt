@@ -17,17 +17,16 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.github.alizarazotellez.bible.ui.theme.BibleTheme
 
@@ -90,28 +89,27 @@ data class CustomNavigationBarItem(val icon: ImageVector, val screen: Screen)
 fun CustomNavigationBar(
     navController: NavController, items: List<CustomNavigationBarItem>
 ) {
-    var selected by remember {
-        mutableIntStateOf(0)
-    }
-
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
     NavigationBar {
-        items.forEachIndexed { index, item ->
-            NavigationBarItem(selected = selected == index, onClick = {
-                selected = index
-                navController.navigate(item.screen) {
-                    // Pop up to the start destination of the graph to
-                    // avoid building up a large stack of destinations
-                    // on the back stack as users select items
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
+        items.forEach { item ->
+            NavigationBarItem(selected = navBackStackEntry?.destination?.hasRoute(item.screen::class)
+                ?: false,
+                onClick = {
+                    navController.navigate(item.screen) {
+                        // Pop up to the start destination of the graph to
+                        // avoid building up a large stack of destinations
+                        // on the back stack as users select items
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        // Avoid multiple copies of the same destination when
+                        // reselecting the same item
+                        launchSingleTop = true
+                        // Restore state when reselecting a previously selected item
+                        restoreState = true
                     }
-                    // Avoid multiple copies of the same destination when
-                    // reselecting the same item
-                    launchSingleTop = true
-                    // Restore state when reselecting a previously selected item
-                    restoreState = true
-                }
-            }, icon = { Icon(item.icon, contentDescription = null) })
+                },
+                icon = { Icon(item.icon, contentDescription = null) })
         }
     }
 }
