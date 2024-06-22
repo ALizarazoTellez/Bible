@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -112,4 +113,10 @@ fun CustomNavigationBar(
                 icon = { Icon(item.icon, contentDescription = null) })
         }
     }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun MainComponentPreview() {
+    MainComponent()
 }
