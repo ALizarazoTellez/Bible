@@ -24,7 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,9 +32,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun BibleScreen(padding: PaddingValues) {
+    val viewModel = viewModel<BibleViewModel>()
+
     Box(
         contentAlignment = Alignment.Center, modifier = Modifier
             .padding(padding)
@@ -53,10 +55,7 @@ fun BibleScreen(padding: PaddingValues) {
             return
         }
 
-        var currentBook by remember { mutableIntStateOf(0) }
-        var currentChapter by remember { mutableIntStateOf(0) }
-
-        val chaptersOfCurrentBook = books[currentBook].Content.size
+        val chaptersOfCurrentBook = books[viewModel.currentBook].Content.size
 
         // LazyColumn helpers.
         var isOnTopList by remember { mutableStateOf(false) }
@@ -72,27 +71,29 @@ fun BibleScreen(padding: PaddingValues) {
             Row(modifier = Modifier.padding(4.dp)) {
                 CustomDropdownMenu(
                     onSelect = {
-                        currentChapter = 0
-                        currentBook = it
+                        viewModel.changeCurrentChapter(0)
+                        viewModel.changeCurrentBook(it)
                         isOnTopList = true
                     },
-                    currentItem = currentBook,
+                    currentItem = viewModel.currentBook,
                     items = Bible.getBookNames(),
                     modifier = Modifier.weight(2f)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 CustomDropdownMenu(
                     onSelect = {
-                        currentChapter = it
+                        viewModel.changeCurrentChapter(it)
                         isOnTopList = true
                     },
-                    currentItem = currentChapter,
+                    currentItem = viewModel.currentChapter,
                     items = (1..chaptersOfCurrentBook).map { it.toString() },
                     modifier = Modifier.weight(1f)
                 )
             }
             ChapterViewer(
-                listState = listState, bookName = books[currentBook].Name, chapter = currentChapter
+                listState = listState,
+                bookName = books[viewModel.currentBook].Name,
+                chapter = viewModel.currentChapter
             )
         }
     }
@@ -114,7 +115,7 @@ fun ChapterViewer(listState: LazyListState, bookName: String, chapter: Int) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomDropdownMenu(
-    onSelect: (Int) -> Unit, currentItem: Int, items: List<String>, modifier: Modifier = Modifier
+    onSelect: (Int) -> Unit, currentItem: Int, items: List<String>, modifier: Modifier = Modifier,
 ) {
     var expanded by remember {
         mutableStateOf(false)
