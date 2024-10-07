@@ -15,11 +15,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
@@ -38,14 +36,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BibleTheme {
-                val context = LocalContext.current
-
                 MainComponent()
-
-                // Preload bible books.
-                LaunchedEffect(Unit) {
-                    Bible.load(context)
-                }
             }
         }
     }
@@ -88,7 +79,7 @@ data class CustomNavigationBarItem(val icon: ImageVector, val screen: Screen)
 
 @Composable
 fun CustomNavigationBar(
-    navController: NavController, items: List<CustomNavigationBarItem>
+    navController: NavController, items: List<CustomNavigationBarItem>,
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     NavigationBar {
