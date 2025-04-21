@@ -10,3 +10,6 @@
 
 # Build cache.
 /.kotlin
+
+# Build artifacts.
+/app/release
